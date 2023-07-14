@@ -1,70 +1,102 @@
+const display = document.querySelector('#display');
+const score = document.createElement('p');
+const message = document.createElement('p');
+const rock = document.querySelector('#rock');
+const paper = document.querySelector('#paper');
+const scissor = document.querySelector('#scissor');
 const choices = ["rock", "paper", "scissor"];
+const maxScore = 5;
 let playerScore = 0;
 let computerScore = 0;
 
 function getComputerChoice() {
     let randomNum = Math.floor(Math.random() * 3);
-    //console.log(`Computer choice: ${choices[randomNum]}`);
     return choices[randomNum];
 }
 
 function getPlayerChoice() {
-    let choice = prompt("Enter your move: ");
-    return choice.toLowerCase();
+    rock.addEventListener('click', () => {
+        playRound(rock.id, getComputerChoice());
+    });
+    paper.addEventListener('click', () => {
+        playRound(paper.id, getComputerChoice());
+    });
+    scissor.addEventListener('click', () => {
+        playRound(scissor.id, getComputerChoice());
+    });
 }
 
 function playRound(playerMove, computerMove) {
-    switch (playerMove.charAt(0) + computerMove.charAt(0)) {
-        case "rr":
-            console.log("You tied! Rock ties against rock");
+    let str = "";
+    switch (playerMove + computerMove) {
+        case "rockrock":
+        case "paperpaper":
+        case "scissorscissor":
+            tie(playerMove);
             break;
-        case "rp":
-            console.log("You lose! Paper beats rock");
-            computerScore++;
+        case "rockpaper":
+        case "paperscissor":
+        case "scissorrock":
+            lose(playerMove, computerMove);
             break;
-        case "rs":
-            console.log("You win! Rock beats scissors");
-            playerScore++;
+        case "rockscissor":
+        case "paperrock":
+        case "scissorpaper":
+            win(playerMove, computerMove);
             break;
-        case "pp":
-            console.log("You tied! Paper ties against paper");
-            break;
-        case "pr":
-            console.log("You win! Paper beats rock");
-            playerScore++;
-            break;
-        case "ps":
-            console.log("You lose! Scissors beats paper");
-            computerScore++;
-            break;
-        case "ss":
-            console.log("You tied! Scissors ties against scissors");
-            break;
-        case "sr":
-            console.log("You lose! Rock beats scissors");
-            computerScore++;
-            break;
-        case "sp":
-            console.log("You win! Scissiors beats paper");
-            playerScore++;
+    }
+}
+
+function tie(playerMove) {
+    if (playerScore !== maxScore && computerScore !== maxScore) {
+        str = `You tied! ${playerMove.charAt(0).toUpperCase() + 
+            playerMove.slice(1)} ties against ${playerMove}.`;
+        updateScoreBoard(str);
+        endGame();
+    }
+}
+
+function win(playerMove, computerMove) {
+    if (playerScore < maxScore && computerScore !== maxScore) {
+        playerScore++;
+        let str = `You win! ${playerMove.charAt(0).toUpperCase() + 
+            playerMove.slice(1)} beats ${computerMove}.`;
+            updateScoreBoard(str);
+        endGame();
+    }
+}
+
+function lose(playerMove, computerMove) {
+    if (playerScore !== maxScore && computerScore < maxScore) {
+        computerScore++;
+        let str = `You lose! ${computerMove.charAt(0).toUpperCase() + 
+            computerMove.slice(1)} beats ${playerMove}.`;
+        updateScoreBoard(str);
+        endGame();
+    }
+}
+
+function updateScoreBoard(str) {
+    score.textContent = `Player: ${playerScore} Computer: ${computerScore}`;
+    message.textContent = str;
+    display.appendChild(score);
+    display.appendChild(message);
+}
+
+function endGame() {
+    if (computerScore === maxScore) {
+        message.textContent = "Computer reached 5 points first. You lose!";
+        display.appendChild(message);
+    }
+    else if (playerScore === maxScore) {
+        message.textContent = "You reached 5 points first. You win!";
+        display.appendChild(message);
     }
 }
 
 function game() {
-    for (let i = 0; i < 5; i++) {
-        console.log(`Round ${i + 1}`);
-        console.log(`Player: ${playerScore} Computer: ${computerScore}`);
-        playRound(getPlayerChoice(), getComputerChoice());
-    }
-    if (playerScore > computerScore) {
-        console.log("Congratulations! You win!");
-    } 
-    else if (computerScore > playerScore) {
-        console.log("Sorry! You lose!");
-    }
-    else {
-        console.log("Tied game!");
-    }
+    updateScoreBoard("");
+    getPlayerChoice();
 }
 
 game();
